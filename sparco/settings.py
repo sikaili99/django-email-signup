@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'anymail',
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
+    'accounts.apps.AccountsConfig',
 ]
 
 
@@ -144,6 +145,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

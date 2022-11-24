@@ -1,0 +1,9 @@
+{% block subject %}Welcome {{full_name}}{% endblock %}
+{% block plain %}
+  Hi {{full_name}},
+
+  You just signed up for Sparco, using:
+      phonenumber: {{phonenumber}}
+
+  Thanks, you rock!
+{% endblock %}
