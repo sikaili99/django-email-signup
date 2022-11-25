@@ -13,22 +13,22 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
-    def _create_user(self, phonenumber, password, **extra_fields):
-        """Create and save a User with the given phonenumber and password."""
-        if not phonenumber:
-            raise ValueError('The given phonenumber must be set')
-        user = self.model(phonenumber=phonenumber, **extra_fields)
+    def _create_user(self, email, password, **extra_fields):
+        """Create and save a User with the given email and password."""
+        if not email:
+            raise ValueError('The given email must be set')
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, phonenumber, password=None, **extra_fields):
-        """Create and save a regular User with the given phonenumber and password."""
+    def create_user(self, email, password=None, **extra_fields):
+        """Create and save a regular User with the given email and password."""
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(phonenumber, password, **extra_fields)
+        return self._create_user(email, password, **extra_fields)
 
-    def create_superuser(self, phonenumber, password, **extra_fields):
+    def create_superuser(self, email, password, **extra_fields):
         """Create and save a SuperUser with the given email and password."""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -38,7 +38,7 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(phonenumber, password, **extra_fields)
+        return self._create_user(email, password, **extra_fields)
 
 
 class AbstractUser(AbstractBaseUser, PermissionsMixin):
@@ -59,7 +59,7 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
     )
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
-    email = models.EmailField(_('email address'), blank=True)
+    email = models.EmailField(_('email address'), unique=True,)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -78,8 +78,8 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     EMAIL_FIELD = 'email'
-    USERNAME_FIELD = 'phonenumber'
-    REQUIRED_FIELDS = ['email','phonenumber']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['email',]
 
     class Meta:
         verbose_name = _('user')
@@ -100,6 +100,17 @@ class AbstractUser(AbstractBaseUser, PermissionsMixin):
 class CustomUser(AbstractUser):
     """Custom user model."""
     phonenumber = models.CharField(_('phone number'),max_length=20, unique=True)
+    email_verified = models.BooleanField(default=False)
+    email_verified_hash = models.CharField(max_length=200, default="01")
 
-    USERNAME_FIELD = 'phonenumber'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+class Profile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    avatar = models.ImageField(default='default.jpg', upload_to='profile_images')
+    is_public = models.BooleanField(default=True)
+    bio = models.TextField()
+
+    def __str__(self):
+        return self.user.first_name

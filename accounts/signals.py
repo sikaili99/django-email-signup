@@ -6,6 +6,8 @@ from rest_framework import status
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
 from templated_email import send_templated_mail
+from django.db.models.signals import post_save
+from .models import CustomUser,Profile
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
@@ -26,4 +28,13 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         Response({"error": "There was an error sending an email,contact admin."}, status=status.HTTP_200_OK)
 
     return Response({'message':"password reset link sent to your email."}, status=status.HTTP_201_CREATED)
-    
+
+
+@receiver(post_save, sender=CustomUser)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=CustomUser)
+def save_profile(sender, instance, **kwargs):
+    instance.profile.save()

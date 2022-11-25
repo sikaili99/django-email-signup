@@ -1,10 +1,11 @@
+import uuid
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from django.contrib.auth.models import update_last_login
 from rest_framework.validators import UniqueValidator
 from django.utils.text import gettext_lazy as _
 from rest_framework import serializers
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Profile
+from .send_email import send_email_verify
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -29,8 +30,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             'last_name',
             'password',
             'password2',
+            'email_verified_hash',
         )
         extra_kwargs = {
+            'email_verified_hash': {'required': False},
             'first_name': {'required': False},
             'last_name': {'required': False},
             'email': {'required': False},
@@ -44,6 +47,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         if len(attrs['password']) < 6:
             raise serializers.ValidationError(
                 {"password": "Password should be 6 charecters long at least"})
+        if CustomUser.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError(
+                {"email": "Email address is already used."})
 
         return attrs
 
@@ -54,10 +60,13 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
         )
-
         user.set_password(validated_data['password'])
+        my_uuid = uuid.uuid4()
+        email=validated_data['email'],
+        first_name=validated_data['first_name'],
+        user.email_verified_hash = str(my_uuid)
         user.save()
-
+        send_email_verify(first_name[0],email[0],str(my_uuid))
         return user
 
 
@@ -68,10 +77,12 @@ class Accountserializer(serializers.ModelSerializer):
         fields = [
             'phonenumber',
             'is_superuser',
-            'address',
+            'is_staff',
+            'email_verified',
             'email',
             'first_name',
             'last_name',
+            'id',
         ]
 
 
@@ -109,3 +120,14 @@ class RefreshTokenSerializer(serializers.Serializer):
             RefreshToken(self.token).blacklist()
         except TokenError:
             self.fail('bad_token')
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    user = serializers.ReadOnlyField(source='user')
+    user_id = serializers.ReadOnlyField(source='user.id')
+    image_url = serializers.ImageField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['id', 'user', 'user_id', 'bio', 'is_public', 'avator']
