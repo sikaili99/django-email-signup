@@ -16,7 +16,7 @@ SECRET_KEY = 'django-insecure-pebx)$jajjt0pujhjxv3tqd4wp%)0m!m@=uf!2gplqs_)a54am
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost','sparco.onrender.com']
 
 
 # Application definition
