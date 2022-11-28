@@ -1,9 +1,9 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
-from templated_email import send_templated_mail
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework import generics, views
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Profile
 from accounts.serializers import (
     Accountserializer,
     CustomTokenObtainPairSerializer,
@@ -43,17 +43,33 @@ class LogoutView(generics.GenericAPIView):
 
 class ProfileView(views.APIView):
 
-    def post(self, *args, **kwargs):
-        serializer = ProfileSerializer(data=self.request.data)
+    def get_object(self, pk):
+        try:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
+            return Response(data={"meesage": "User not found"},status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=ProfileSerializer)
+    def put(self, request, pk, format=None):
+        profile = self.get_object(pk)
+        serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
-            serializer.sav(user=self.request.user)
-            return Response(data=serializer.data,status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST, data={'errors': serializer.errors})
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ValidateEmailToken(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
+    @swagger_auto_schema(
+     operation_description="Post request to include token filed {'token': 'token'}"
+     )
     def post(self, request, *args, **kwargs):
         token = request.data.get('token')
         res = {

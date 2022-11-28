@@ -4,7 +4,8 @@ from accounts.views import (
     ValidateEmailToken,
     ListUsersView, 
     RegisterView,
-    LogoutView, 
+    ProfileView,
+    LogoutView,
     )
 from django.urls import path
 
@@ -12,6 +13,7 @@ urlpatterns = [
     path('token/', EmailTokenObtainPairView.as_view()),
     path('email/verify/', ValidateEmailToken.as_view()),
     path('token/refresh/', TokenRefreshView.as_view()),
+    path('profile/<int:pk>/', ProfileView.as_view()),
     path('users/', ListUsersView.as_view()),
     path('register/', RegisterView.as_view()),
     path('logout/', LogoutView.as_view()),

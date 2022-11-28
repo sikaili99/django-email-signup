@@ -124,10 +124,6 @@ class RefreshTokenSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
 
-    user = serializers.ReadOnlyField(source='user')
-    user_id = serializers.ReadOnlyField(source='user.id')
-    image_url = serializers.ImageField(required=False)
-
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'user_id', 'bio', 'is_public', 'avator']
+        fields = ['id', 'bio', 'is_public', 'avatar']
