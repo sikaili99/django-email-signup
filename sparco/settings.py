@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'sparco.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 # Temp database
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://sparco:lbTnie76tl35qvvjVESp0eyvt6JFCn03@dpg-ce37lhg2i3mt1ftogmug-a.frankfurt-postgres.render.com/sparco', conn_max_age=600)
+    'default': dj_database_url.config(default=os.environ.get('DATADATA_URL'), conn_max_age=600)
     }
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
