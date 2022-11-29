@@ -89,17 +89,10 @@ WSGI_APPLICATION = 'sparco.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
+# Temp database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default': dj_database_url.config(default='postgres://rudo:9eTURj81FV8Gq2H6S2ldg5eHFM2wvjpF@dpg-ce2jrpun6mpmkc6kih20-a.oregon-postgres.render.com/rudo', conn_max_age=600)
     }
-}
-
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
